@@ -115,10 +115,11 @@ async fn main() -> Result<()> {
             // Report to API if configured
             if !no_report {
                 if let Some(url) = api_url {
-                    let project_name = repo.get_project_name().unwrap_or_else(|_| "unknown".to_string());
-                    
-                    // Report all events asynchronously (fire and forget)
-                    let url_clone = url.clone();
+                    let project_name =
+                        repo.get_project_name().unwrap_or_else(|_| "unknown".to_string());
+
+                    // Report all events and wait for completion so they reach the API
+                    let client = ApiClient::new(&url);
                     for finding in &findings {
                         let event = ScanEvent {
                             timestamp: Utc::now().to_rfc3339(),
@@ -129,15 +130,10 @@ async fn main() -> Result<()> {
                             line_number: finding.line,
                             preview: finding.preview.clone(),
                         };
-                        
-                        // Async, non-blocking report - spawn and forget
-                        let client = ApiClient::new(&url_clone);
-                        let event_clone = event.clone();
-                        tokio::spawn(async move {
-                            if let Err(e) = client.report_event(&event_clone).await {
-                                eprintln!("Warning: Failed to report event: {}", e);
-                            }
-                        });
+
+                        if let Err(e) = client.report_event(&event).await {
+                            eprintln!("Warning: Failed to report event: {}", e);
+                        }
                     }
                 }
             }

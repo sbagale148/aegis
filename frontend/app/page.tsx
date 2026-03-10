@@ -87,16 +87,19 @@ export default function Home() {
                   title="Total Events"
                   value={stats.total_events.toString()}
                   description="Secrets blocked"
+                  variant="events"
                 />
                 <StatsCard
                   title="Projects"
                   value={stats.by_project.length.toString()}
                   description="Monitored repositories"
+                  variant="projects"
                 />
                 <StatsCard
                   title="Secret Types"
                   value={stats.by_secret_type.length.toString()}
                   description="Unique patterns detected"
+                  variant="secretTypes"
                 />
               </div>
             )}
